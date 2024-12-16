@@ -1,0 +1,41 @@
+<?php
+
+function fachb_install() {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+
+  $betrieb = "betrieb";
+  $kategorie = "kategorie";
+  $betrieb_in_kategorie = "betrieb_in_kategorie";
+
+  // We do not and cannot use the dbDelta mechanism as it does not support
+  // FOREIGN KEY constraints.
+  
+  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$betrieb (
+    id int NOT NULL AUTO_INCREMENT,
+    name text NOT NULL,
+    adresse text NOT NULL,
+    url text DEFAULT '' NOT NULL,
+    PRIMARY KEY  (id)
+  );");
+
+  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$kategorie (
+    id int NOT NULL AUTO_INCREMENT,
+    name text NOT NULL UNIQUE,
+    PRIMARY KEY  (id)
+  );");
+
+  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$betrieb_in_kategorie (
+    betrieb int NOT NULL,
+    kategorie int NOT NULL,
+    PRIMARY KEY  (betrieb, kategorie),
+    FOREIGN KEY (betrieb) REFERENCES $prefix$betrieb(id),
+    FOREIGN KEY (kategorie) REFERENCES $prefix$kategorie(id)
+  );");
+}
+
+// TODO: Deinstallation.
+
+// TODO: How to handle migrations.
+

@@ -1,0 +1,23 @@
+{
+    "name": "wunst/wp-plugin-bauinnung-fachbetriebe-search",
+    "description": "Wordpress Plugin für die Bauinnung Kiel zur Suche von Fachbetrieben nach Kategorie/Gewerk/Ort",
+    "type": "project",
+    "require": {
+        "geocoder-php/nominatim-provider": "^5.7",
+        "symfony/http-client": "^7.2",
+        "nyholm/psr7": "^1.8",
+        "psr/http-client": "^1.0"
+    },
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Wunst",
+            "email": "matthiesbe@gmail.com"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

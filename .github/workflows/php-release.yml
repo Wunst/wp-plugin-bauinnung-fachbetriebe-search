@@ -25,6 +25,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.tag.output.tag }}
+
+    - name: Setup PHP
+      uses: nanasess/setup-php@v4
+      with:
+        php-version: "8.2"
   
     - name: Cache Composer packages
       id: composer-cache

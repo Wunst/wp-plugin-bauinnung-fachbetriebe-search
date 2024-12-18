@@ -14,11 +14,12 @@
  */
 
 define( "fachb_PLUGDIR", plugin_dir_path(__FILE__) );
-define( "fachb_PLUGURL", plugin_dir_path(__FILE__) );
+define( "fachb_PLUGURL", plugin_dir_url(__FILE__) );
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 require_once( fachb_PLUGDIR . "includes/db.php" );
+require_once( fachb_PLUGDIR . "includes/admin.php" );
 
 register_activation_hook( __FILE__, "fachb_install" );
 

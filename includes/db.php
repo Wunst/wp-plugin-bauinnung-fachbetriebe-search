@@ -39,3 +39,25 @@ function fachb_install() {
 
 // TODO: How to handle migrations.
 
+function fachb_list() {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $betrieb = "betrieb";
+
+  return $wpdb->get_results( "SELECT * FROM $prefix$betrieb;" );
+}
+
+function fachb_get( $id ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $betrieb = "betrieb";
+
+  return $wpdb->get_row( $wpdb->prepare( "SELECT * 
+    FROM $prefix$betrieb
+    WHERE id = %d;", 
+    $id )
+  );
+}
+

@@ -3,27 +3,40 @@ require_once( fachb_PLUGDIR . "includes/db.php" );
 
 add_action( "admin_menu", "fachb_form_register" );
 add_action( "admin_post_fachb_create", "fachb_create_handler");
+add_action( "admin_post_fachb_delete", "fachb_delete_handler");
 
 function fachb_form_register() {
   add_menu_page( "Fachbetrieb", "Fachbetrieb", "publish_posts", "fachbetrieb", "fachb_form" );
 }
 
-function fachb_create_handler() {
-  function require_param($key) {
-    if ( !$_POST[$key] ) {
-      status_header(400);
-      exit( "Fehlender Parameter: $key" );
-    }
-    return $_POST[$key];
+/*
+ * Exits with error if param with key not given, otherwise returns param.
+ */
+function fachb_require_param($key) {
+  if ( !$_POST[$key] ) {
+    status_header(400);
+    exit( "Fehlender Parameter: $key" );
   }
+  return $_POST[$key];
+}
 
-  $name = require_param("name");
-  $address = require_param("address");
-  $url = $_POST[$url]; // optional
+function fachb_create_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $name = fachb_require_param("name");
+  $address = fachb_require_param("address");
+  $url = $_POST["url"]; // optional
 
   $id = fachb_create( $name, $address, $url );
 
   wp_redirect( admin_url( "?page=fachbetrieb&id=$id" ) );
+  exit();
+}
+
+function fachb_delete_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $id = fachb_require_param("id");
+  fachb_delete( intval( $id ) );
+  wp_redirect( admin_url( "?page=fachbetrieb" ) );
   exit();
 }
 
@@ -37,16 +50,14 @@ function fachb_form() {
 
 function fachb_form_update() {
   $betrieb = fachb_get( $_GET["id"] );
+
+  // TODO: handle non-existent id
+ 
 ?>
   <h1>Ändern des Betriebs: <?php
     echo $betrieb->name;
   ?></h1>
-  <!-- Form to go back without leaving admin panel. -->
-  <form action"" method="get">
-    <input type="hidden" name="page" value="fachbetrieb"/>
-    <input type="submit" value="Zurück zum Menü"/>
-  </form>
-  <p/>
+  <a href="">&lt; Zurück</a>
   <!-- Main form. -->
   <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
     <input type="hidden" name="action" value="fachb_update" />

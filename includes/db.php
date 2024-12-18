@@ -83,3 +83,12 @@ function fachb_create( $name, $adresse, $url ) {
   return $wpdb->insert_id;
 }
 
+function fachb_delete( $id ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $betrieb = "betrieb";
+
+  $wpdb->delete( "$prefix$betrieb", array( "id" => $id ) );
+}
+

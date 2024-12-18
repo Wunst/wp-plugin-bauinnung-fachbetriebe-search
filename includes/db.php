@@ -33,6 +33,10 @@ function fachb_install() {
     FOREIGN KEY (betrieb) REFERENCES $prefix$betrieb(id),
     FOREIGN KEY (kategorie) REFERENCES $prefix$kategorie(id)
   );");
+
+  // Migrations.
+  // Make table nullable.
+  $wpdb->query( "ALTER TABLE $prefix$betrieb MODIFY url text" );
 }
 
 // TODO: Deinstallation.
@@ -59,5 +63,23 @@ function fachb_get( $id ) {
     WHERE id = %d;", 
     $id )
   );
+}
+
+/*
+ * Erstellt einen Betrieb und gibt die ID zurück.
+ */
+function fachb_create( $name, $adresse, $url ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $betrieb = "betrieb";
+
+  $wpdb->insert( "$prefix$betrieb", array(
+    "name" => $name,
+    "adresse" => $adresse,
+    "url" => $url
+  ) );
+
+  return $wpdb->insert_id;
 }
 

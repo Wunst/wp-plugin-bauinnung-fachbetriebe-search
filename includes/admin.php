@@ -2,9 +2,29 @@
 require_once( fachb_PLUGDIR . "includes/db.php" );
 
 add_action( "admin_menu", "fachb_form_register" );
+add_action( "admin_post_fachb_create", "fachb_create_handler");
 
 function fachb_form_register() {
   add_menu_page( "Fachbetrieb", "Fachbetrieb", "publish_posts", "fachbetrieb", "fachb_form" );
+}
+
+function fachb_create_handler() {
+  function require_param($key) {
+    if ( !$_POST[$key] ) {
+      status_header(400);
+      exit( "Fehlender Parameter: $key" );
+    }
+    return $_POST[$key];
+  }
+
+  $name = require_param("name");
+  $address = require_param("address");
+  $url = $_POST[$url]; // optional
+
+  $id = fachb_create( $name, $address, $url );
+
+  wp_redirect( admin_url( "?page=fachbetrieb&id=$id" ) );
+  exit();
 }
 
 function fachb_form() {
@@ -28,10 +48,9 @@ function fachb_form_update() {
   </form>
   <p/>
   <!-- Main form. -->
-  <form action="<?php
-    echo fachb_PLUGURL . "form/update.php";
-  ?>" method="post">
-    <input type="hidden" name="id" value="<?php echo $_GET["id"]; ?>">
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_update" />
+    <input type="hidden" name="id" value="<?php echo $_GET["id"]; ?>" />
     <div>
       <input type="text" name="name" value="<?php
         echo $betrieb->name; 
@@ -63,9 +82,8 @@ function fachb_form_update() {
 function fachb_form_base() { ?>
   <h1>Fachbetrieb</h1>
   <h2>Betrieb hinzufügen</h2>
-  <form action="<?php
-    echo fachb_PLUGURL . "form/create.php";
-  ?>" method="post">
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_create" />
     <div>
       <input type="text" name="name" id="name" 
         placeholder="Baugeschäft Mustermann" required>
@@ -99,9 +117,8 @@ function fachb_form_base() { ?>
   </form>
 
   <h2>Betrieb löschen</h2>
-  <form action="<?php
-    echo fachb_PLUGURL . "form/delete.php";
-  ?>" method="post">
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_delete" />
     <?php fachb_form_select(); ?>
     <input type="submit" value="Löschen" 
       onclick="return confirm('Sind Sie sicher?')"/>

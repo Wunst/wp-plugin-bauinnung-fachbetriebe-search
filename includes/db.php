@@ -141,3 +141,14 @@ function fachb_category_delete( $id ) {
   $wpdb->delete( "$prefix$kategorie", array( "id" => $id ) );
 }
 
+function fachb_category_update( $id, $name ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $kategorie = "kategorie";
+
+  $wpdb->update( "$prefix$kategorie", array(
+    "name" => $name
+  ), array( "id" => $id ) );
+}
+

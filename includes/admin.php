@@ -6,6 +6,7 @@ add_action( "admin_post_fachb_create", "fachb_create_handler");
 add_action( "admin_post_fachb_delete", "fachb_delete_handler");
 add_action( "admin_post_fachb_update", "fachb_update_handler" );
 add_action( "admin_post_fachb_cat_create", "fachb_cat_create_handler" );
+add_action( "admin_post_fachb_cat_update", "fachb_cat_update_handler" );
 add_action( "admin_post_fachb_cat_delete", "fachb_cat_delete_handler" );
 
 function fachb_form_register() {
@@ -74,6 +75,17 @@ function fachb_cat_delete_handler() {
   // TODO(IMPORTANT): Check user permission!
   $id = fachb_require_param("id");
   fachb_category_delete( intval( $id ) );
+  wp_redirect( admin_url( "?page=fachbetrieb" ) );
+  exit();
+}
+
+function fachb_cat_update_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $id = fachb_require_param("id");
+  $name = fachb_require_param("name");
+
+  fachb_category_update( intval( $id ), $name );
+
   wp_redirect( admin_url( "?page=fachbetrieb" ) );
   exit();
 }
@@ -188,6 +200,19 @@ function fachb_form_base() { ?>
       </label>
     </div>
     <input type="submit" value="Hinzufügen"/>
+  </form>
+
+  <h2>Kategorie umbenennen</h2>
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_cat_update" />
+    <?php fachb_form_select_category(); ?>
+    <div>
+      <input type="text" name="name" id="name" required>
+      <label for="name">
+        Neuer Name
+      </label>
+    </div>
+    <input type="submit" value="Umbenennen" />
   </form>
 
   <h2>Kategorie löschen</h2>

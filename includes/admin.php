@@ -80,7 +80,7 @@ function fachb_cat_delete_handler() {
 
 function fachb_form() {
   if ( $_GET["id"] ) {
-    fachb_form_update( $_GET["id"] );
+    fachb_form_update();
   } else {
     fachb_form_base();
   }
@@ -89,7 +89,10 @@ function fachb_form() {
 function fachb_form_update() {
   $betrieb = fachb_get( $_GET["id"] );
 
-  // TODO: handle non-existent id
+  if ( !$betrieb ) {
+    fachb_form_base();
+    exit();
+  }
  
 ?>
   <h1>Ändern des Betriebs: <?php

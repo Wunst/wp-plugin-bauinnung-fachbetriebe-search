@@ -35,7 +35,7 @@ function fachb_install() {
   );");
 
   // Migrations.
-  // Make table nullable.
+  // Make url nullable.
   $wpdb->query( "ALTER TABLE $prefix$betrieb MODIFY url text" );
 }
 

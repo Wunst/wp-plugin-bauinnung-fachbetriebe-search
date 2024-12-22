@@ -14,6 +14,17 @@ function fachb_form_register() {
 }
 
 /*
+ * Exits with error if user does not have permission to update the database.
+ * Note: Permission is tied to capability to `publish_posts`.
+ */
+function fachb_check_permission() {
+  if ( !current_user_can( "publish_posts" ) ) {
+    status_header(403);
+    exit( "Du hast keine Berechtigung, die Datenbank zu aktualisieren." );
+  }
+}
+
+/*
  * Exits with error if param with key not given, otherwise returns param.
  */
 function fachb_require_param($key) {
@@ -25,7 +36,7 @@ function fachb_require_param($key) {
 }
 
 function fachb_create_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $name = fachb_require_param("name");
   $address = fachb_require_param("address");
   $url = $_POST["url"]; // optional
@@ -37,7 +48,7 @@ function fachb_create_handler() {
 }
 
 function fachb_delete_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $id = fachb_require_param("id");
   fachb_delete( intval( $id ) );
   wp_redirect( admin_url( "?page=fachbetrieb" ) );
@@ -45,7 +56,7 @@ function fachb_delete_handler() {
 }
 
 function fachb_update_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $id = fachb_require_param("id");
 
   $name = fachb_require_param("name");
@@ -62,7 +73,7 @@ function fachb_update_handler() {
 }
 
 function fachb_cat_create_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $name = fachb_require_param( "name" );
 
   $id = fachb_category_create( $name );
@@ -72,7 +83,7 @@ function fachb_cat_create_handler() {
 }
 
 function fachb_cat_delete_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $id = fachb_require_param("id");
   fachb_category_delete( intval( $id ) );
   wp_redirect( admin_url( "?page=fachbetrieb" ) );
@@ -80,7 +91,7 @@ function fachb_cat_delete_handler() {
 }
 
 function fachb_cat_update_handler() {
-  // TODO(IMPORTANT): Check user permission!
+  fachb_check_permission();
   $id = fachb_require_param("id");
   $name = fachb_require_param("name");
 

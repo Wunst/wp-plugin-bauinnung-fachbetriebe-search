@@ -92,3 +92,52 @@ function fachb_delete( $id ) {
   $wpdb->delete( "$prefix$betrieb", array( "id" => $id ) );
 }
 
+function fachb_update( $id, $name, $adresse, $url ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $betrieb = "betrieb";
+
+  $wpdb->update( "$prefix$betrieb", array(
+    "name" => $name,
+    "adresse" => $adresse,
+    "url" => $url
+  ), array( "id" => $id ) );
+}
+
+/*
+ * Erstellt eine Kategorie und gibt die ID zurück.
+ */
+function fachb_category_create( $name )
+{
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $kategorie = "kategorie";
+
+  $wpdb->insert( "$prefix$kategorie", array(
+    "name" => $name
+  ) );
+
+  return $wpdb->insert_id;
+}
+
+function fachb_category_list()
+{
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $kategorie = "kategorie";
+
+  return $wpdb->get_results( "SELECT * FROM $prefix$kategorie;" );
+}
+
+function fachb_category_delete( $id ) {
+  global $wpdb;
+
+  $prefix = $wpdb->prefix . "fachb_";
+  $kategorie = "kategorie";
+
+  $wpdb->delete( "$prefix$kategorie", array( "id" => $id ) );
+}
+

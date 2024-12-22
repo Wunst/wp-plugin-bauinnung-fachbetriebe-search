@@ -4,6 +4,9 @@ require_once( fachb_PLUGDIR . "includes/db.php" );
 add_action( "admin_menu", "fachb_form_register" );
 add_action( "admin_post_fachb_create", "fachb_create_handler");
 add_action( "admin_post_fachb_delete", "fachb_delete_handler");
+add_action( "admin_post_fachb_update", "fachb_update_handler" );
+add_action( "admin_post_fachb_cat_create", "fachb_cat_create_handler" );
+add_action( "admin_post_fachb_cat_delete", "fachb_cat_delete_handler" );
 
 function fachb_form_register() {
   add_menu_page( "Fachbetrieb", "Fachbetrieb", "publish_posts", "fachbetrieb", "fachb_form" );
@@ -40,6 +43,41 @@ function fachb_delete_handler() {
   exit();
 }
 
+function fachb_update_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $id = fachb_require_param("id");
+
+  $name = fachb_require_param("name");
+  $address = fachb_require_param("adresse");
+  $url = $_POST["url"];
+
+  if ( !$url ) // Do not display a link on empty URL.
+    $url = null;
+
+  fachb_update( intval( $id ), $name, $address, $url );
+
+  wp_redirect( admin_url( "?page=fachbetrieb" ) );
+  exit();
+}
+
+function fachb_cat_create_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $name = fachb_require_param( "name" );
+
+  $id = fachb_category_create( $name );
+
+  wp_redirect( admin_url( "?page=fachbetrieb" ) );
+  exit();
+}
+
+function fachb_cat_delete_handler() {
+  // TODO(IMPORTANT): Check user permission!
+  $id = fachb_require_param("id");
+  fachb_category_delete( intval( $id ) );
+  wp_redirect( admin_url( "?page=fachbetrieb" ) );
+  exit();
+}
+
 function fachb_form() {
   if ( $_GET["id"] ) {
     fachb_form_update( $_GET["id"] );
@@ -57,7 +95,7 @@ function fachb_form_update() {
   <h1>Ändern des Betriebs: <?php
     echo $betrieb->name;
   ?></h1>
-  <a href="">&lt; Zurück</a>
+  <a href="<?php echo admin_url( "?page=fachbetrieb" ) ?>">&lt; Zurück</a>
   <!-- Main form. -->
   <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
     <input type="hidden" name="action" value="fachb_update" />
@@ -134,6 +172,28 @@ function fachb_form_base() { ?>
     <input type="submit" value="Löschen" 
       onclick="return confirm('Sind Sie sicher?')"/>
   </form>
+
+  <h1>Kategorie</h1>
+  <h2>Kategorie hinzufügen</h2>
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_cat_create" />
+    <div>
+      <input type="text" name="name" id="name" 
+        placeholder="Energetische Sanierung" required>
+      <label for="name">
+        Name der Kategorie
+      </label>
+    </div>
+    <input type="submit" value="Hinzufügen"/>
+  </form>
+
+  <h2>Kategorie löschen</h2>
+  <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <input type="hidden" name="action" value="fachb_cat_delete" />
+    <?php fachb_form_select_category(); ?>
+    <input type="submit" value="Löschen" 
+      onclick="return confirm('Sind Sie sicher?')"/>
+  </form>
 <?php }
 
 function fachb_form_select() { ?>
@@ -145,6 +205,21 @@ function fachb_form_select() { ?>
 <?php
   foreach ( fachb_list() as $betrieb ) {
     echo "<option value=$betrieb->id>$betrieb->name</option>";
+  }
+?>
+    </select>
+  <div>
+<?php }
+
+function fachb_form_select_category() { ?>
+  <div>
+    <label for="id">
+      Kategorie wählen
+    </label>
+    <select name="id" id="id" required>
+<?php
+  foreach ( fachb_category_list() as $cat ) {
+    echo "<option value=$cat->id>$cat->name</option>";
   }
 ?>
     </select>

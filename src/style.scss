@@ -6,7 +6,12 @@
  */
 
 .wp-block-fachbetrieb-fachbetrieb-finden {
-	background-color: #21759b;
-	color: #fff;
-	padding: 2px;
+  padding-top: 1em;
 }
+
+.fachbetrieb-search-form {
+  display: block;
+  padding: 1em;
+  background-color: var(--wp--preset--color--base);
+}
+

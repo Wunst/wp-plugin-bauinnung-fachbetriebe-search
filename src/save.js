@@ -17,8 +17,8 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 export default function save() {
 	return (
-		<p { ...useBlockProps.save() }>
+		<div id="fachbetriebe-suche" { ...useBlockProps.save() }>
 			{ 'Fachbetrieb finden – hello from the saved content!' }
-		</p>
+		</div>
 	);
 }

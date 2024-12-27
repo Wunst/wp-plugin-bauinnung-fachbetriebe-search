@@ -20,6 +20,16 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
  */
 
-/* eslint-disable no-console */
-console.log( 'Hello World! (from fachbetrieb-fachbetrieb-finden block)' );
-/* eslint-enable no-console */
+import { render } from '@wordpress/element'
+
+function Greeting( props ) {
+  return <p>
+    Hello, world!
+  </p>
+}
+
+render(
+  <Greeting/>,
+  document.getElementById( 'fachbetriebe-suche' )
+)
+

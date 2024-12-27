@@ -7,7 +7,6 @@
 	"category": "widgets",
 	"icon": "database",
 	"description": "Erlaubt die Fachbetriebesuche nach Kategorien und Orten",
-	"example": {},
 	"supports": {
 		"html": false
 	},

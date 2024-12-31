@@ -11,7 +11,17 @@
 
 .fachbetrieb-search-form {
   display: block;
+  position: sticky;
   padding: 1em;
+  background-color: var(--wp--preset--color--base);
+}
+
+.fachbetrieb-search-result {
+  display: block;
+  padding: 1em;
+  min-height: 10em;
+  margin-bottom: 1em;
+  align-content: center;
   background-color: var(--wp--preset--color--base);
 }
 

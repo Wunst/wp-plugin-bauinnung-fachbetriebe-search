@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/Wunst/wp-plugin-bauinnung-kiel-fachbetriebe-search
  * Author: Ben Matthies
  * Author URI: https://github.com/Wunst
- * Version: 1.1.1
+ * Version: 1.2.0
  * Update URI: false
  * GitHub Plugin URI: Wunst/wp-plugin-bauinnung-kiel-fachbetriebe-search
  * Primary Branch: main

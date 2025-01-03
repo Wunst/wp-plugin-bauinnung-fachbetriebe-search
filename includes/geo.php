@@ -4,10 +4,12 @@ use Geocoder\Query\GeocodeQuery;
 
 $provider = new \Geocoder\Provider\Cache\ProviderCache(
   \Geocoder\Provider\Nominatim\Nominatim::withOpenStreetMapServer(
-    \Symfony\Component\HttpClient\HttpClient::create(),
+    new \Symfony\Component\HttpClient\Psr18Client(),
     "Fachbetriebesuche der Bauinnung Kiel"
   ),
-  new \Symfony\Component\Cache\Adapter\FilesystemAdapter()
+  new \Symfony\Component\Cache\Psr16Cache(
+    new \Symfony\Component\Cache\Adapter\FilesystemAdapter()
+  )
 );
 
 $geocoder = new \Geocoder\StatefulGeocoder( $provider, "de" );

@@ -48,7 +48,8 @@ function fachb_rest_search( WP_REST_Request $request ) {
   // Betrieben Entfernung zuordnen.
   $betriebe = array_map( function ( $b ) use ( $address ) {
     return array_merge( $b, array(
-      "distance" => fachb_distance( $address, $b->adresse );
+      "distance" => fachb_distance( $address, $b->adresse )
+    ) );
   }, $betriebe );
 
   return array(

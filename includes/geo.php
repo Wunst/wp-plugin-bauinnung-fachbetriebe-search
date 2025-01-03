@@ -12,8 +12,6 @@ $provider = new \Geocoder\Provider\Cache\ProviderCache(
   )
 );
 
-$geocoder = new \Geocoder\StatefulGeocoder( $provider, "de" );
-
 /*
  * Ermittelt Distanz zwischen Koordinaten.
  */
@@ -37,24 +35,31 @@ function fachb_haversine( $a, $b ) {
  * Ermittelt die Distanz in Kilometern zwischen addressA und addressB.
  */
 function fachb_distance( $addressA, $addressB ) {
-  $a = $geocoder->geocode(
-    GeocodeQuery::create( $addressA ) 
-  )->first();
+  global $provider;
 
-  $b = $geocoder->geocode(
-    GeocodeQuery::create( $addressB ) 
-  )->first();
+  $a = $provider->geocodeQuery(
+    GeocodeQuery::create( $addressA )->withLimit( 1 ) 
+  );
 
-  if ( !$a || !$b ) {
+  $b = $provider->geocodeQuery(
+    GeocodeQuery::create( $addressB )->withLimit( 1 ) 
+  );
+
+  if ( $a->isEmpty() || $b->isEmpty() ) {
     return null;
   }
 
-  return fachb_haversine( $a->getCoordinates(), $b->getCoordinates() );
+  return fachb_haversine(
+    $a->first()->getCoordinates(), 
+    $b->first()->getCoordinates() 
+  );
 }
 
 function fachb_check_address( $address ) {
-  return null != $geocoder->geocode(
-    GeocodeQuery::create( $address )
-  )->first();
+  global $provider;
+
+  return !$provider->geocodeQuery(
+    GeocodeQuery::create( $address )->withLimit( 1 )
+  )->isEmpty();
 }
 

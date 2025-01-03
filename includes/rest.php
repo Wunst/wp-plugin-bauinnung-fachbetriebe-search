@@ -47,17 +47,19 @@ function fachb_rest_search( WP_REST_Request $request ) {
 
   // Betrieben Entfernung zuordnen.
   $betriebe = array_map( function ( $b ) use ( $address ) {
-    return array_merge( $b, array(
+    return array_merge( (array)$b, array(
       "distance" => fachb_distance( $address, $b->adresse )
     ) );
   }, $betriebe );
 
+  usort( $betriebe, function ( $a, $b ) {
+    // FIXME: was wenn Betrieb ungültige Adresse hat? (ganz hinten einsortieren?)
+    return $a["distance"] <=> $b["distance"];
+  } );
+
   return array(
     "sorted" => true,
-    "results" => usort( $betriebe, function ( $a, $b ) {
-      // FIXME: was wenn Betrieb ungültige Adresse hat? (ganz hinten einsortieren?)
-      return $a->distance <=> $b->distance;
-    } )
+    "results" => $betriebe
   );
 }
 

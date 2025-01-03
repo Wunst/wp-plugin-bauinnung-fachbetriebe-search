@@ -1,18 +1,14 @@
 <?php
 
+$prefix = $wpdb->prefix . "fachb_";
+
 function fachb_install() {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-
-  $betrieb = "betrieb";
-  $kategorie = "kategorie";
-  $betrieb_in_kategorie = "betrieb_in_kategorie";
+  global $wpdb, $prefix;
 
   // We do not and cannot use the dbDelta mechanism as it does not support
   // FOREIGN KEY constraints.
   
-  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$betrieb (
+  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}betrieb (
     id int NOT NULL AUTO_INCREMENT,
     name text NOT NULL,
     adresse text NOT NULL,
@@ -20,13 +16,13 @@ function fachb_install() {
     PRIMARY KEY  (id)
   );");
 
-  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$kategorie (
+  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}kategorie (
     id int NOT NULL AUTO_INCREMENT,
     name text NOT NULL UNIQUE,
     PRIMARY KEY  (id)
   );");
 
-  $wpdb->query("CREATE TABLE IF NOT EXISTS $prefix$betrieb_in_kategorie (
+  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}betrieb_in_kategorie (
     betrieb int NOT NULL,
     kategorie int NOT NULL,
     PRIMARY KEY  (betrieb, kategorie),
@@ -36,7 +32,7 @@ function fachb_install() {
 
   // Migrations.
   // Make url nullable.
-  $wpdb->query( "ALTER TABLE $prefix$betrieb MODIFY url text" );
+  $wpdb->query( "ALTER TABLE {$prefix}betrieb MODIFY url text" );
 }
 
 // TODO: Deinstallation.
@@ -44,22 +40,14 @@ function fachb_install() {
 // TODO: How to handle migrations.
 
 function fachb_list() {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $betrieb = "betrieb";
-
-  return $wpdb->get_results( "SELECT * FROM $prefix$betrieb;" );
+  global $wpdb, $prefix;
+  return $wpdb->get_results( "SELECT * FROM {$prefix}betrieb;" );
 }
 
 function fachb_get( $id ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $betrieb = "betrieb";
-
+  global $wpdb, $prefix;
   return $wpdb->get_row( $wpdb->prepare( "SELECT * 
-    FROM $prefix$betrieb
+    FROM {$prefix}betrieb
     WHERE id = %d;", 
     $id )
   );
@@ -69,12 +57,8 @@ function fachb_get( $id ) {
  * Erstellt einen Betrieb und gibt die ID zurück.
  */
 function fachb_create( $name, $adresse, $url ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $betrieb = "betrieb";
-
-  $wpdb->insert( "$prefix$betrieb", array(
+  global $wpdb, $prefix;
+  $wpdb->insert( "{$prefix}betrieb", array(
     "name" => $name,
     "adresse" => $adresse,
     "url" => $url
@@ -84,21 +68,13 @@ function fachb_create( $name, $adresse, $url ) {
 }
 
 function fachb_delete( $id ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $betrieb = "betrieb";
-
-  $wpdb->delete( "$prefix$betrieb", array( "id" => $id ) );
+  global $wpdb, $prefix;
+  $wpdb->delete( "{$prefix}betrieb", array( "id" => $id ) );
 }
 
 function fachb_update( $id, $name, $adresse, $url ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $betrieb = "betrieb";
-
-  $wpdb->update( "$prefix$betrieb", array(
+  global $wpdb, $prefix;
+  $wpdb->update( "{$prefix}betrieb", array(
     "name" => $name,
     "adresse" => $adresse,
     "url" => $url
@@ -110,12 +86,8 @@ function fachb_update( $id, $name, $adresse, $url ) {
  */
 function fachb_category_create( $name )
 {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $kategorie = "kategorie";
-
-  $wpdb->insert( "$prefix$kategorie", array(
+  global $wpdb, $prefix;
+  $wpdb->insert( "{$prefix}kategorie", array(
     "name" => $name
   ) );
 
@@ -124,30 +96,18 @@ function fachb_category_create( $name )
 
 function fachb_category_list()
 {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $kategorie = "kategorie";
-
-  return $wpdb->get_results( "SELECT * FROM $prefix$kategorie;" );
+  global $wpdb, $prefix;
+  return $wpdb->get_results( "SELECT * FROM {$prefix}kategorie;" );
 }
 
 function fachb_category_delete( $id ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $kategorie = "kategorie";
-
-  $wpdb->delete( "$prefix$kategorie", array( "id" => $id ) );
+  global $wpdb, $prefix;
+  $wpdb->delete( "{$prefix}kategorie", array( "id" => $id ) );
 }
 
 function fachb_category_update( $id, $name ) {
-  global $wpdb;
-
-  $prefix = $wpdb->prefix . "fachb_";
-  $kategorie = "kategorie";
-
-  $wpdb->update( "$prefix$kategorie", array(
+  global $wpdb, $prefix;
+  $wpdb->update( "{$prefix}kategorie", array(
     "name" => $name
   ), array( "id" => $id ) );
 }

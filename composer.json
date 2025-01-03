@@ -6,7 +6,9 @@
         "geocoder-php/nominatim-provider": "^5.7",
         "symfony/http-client": "^7.2",
         "nyholm/psr7": "^1.8",
-        "psr/http-client": "^1.0"
+        "psr/http-client": "^1.0",
+        "geocoder-php/cache-provider": "^4.4",
+        "symfony/cache": "^7.2"
     },
     "license": "proprietary",
     "authors": [

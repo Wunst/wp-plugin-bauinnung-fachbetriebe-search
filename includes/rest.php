@@ -13,8 +13,11 @@ function fachb_rest_api_init() {
 }
 
 /*
- * GET /fachbetrieb/v1/search?a=[adresse]&d=[maxDistanz]
+ * GET /fachbetrieb/v1/search?c=[kategorien]&a=[adresse]&d=[maxDistanz]
  * Liefert die Fachbetriebe nach Entfernung von der Adresse geordnet.
+ *
+ * c= Komma-getrennte Liste von Kategorien
+ * Betrieb muss ALLE Kategorien haben, um angezeigt zu werden.
  *
  * Response:
  *  {
@@ -33,8 +36,12 @@ function fachb_rest_api_init() {
  * Nominatim nicht aufgelöst werden konnte.
  */
 function fachb_rest_search( WP_REST_Request $request ) {
-  // TODO: filtern nach Kategorie.
-  $betriebe = fachb_list();
+  $cat = $request[ "c" ];
+  $betriebe = $cat ?
+    fachb_list_with_categories(
+      array_map( "intval", explode( ",", $request[ "c" ] ) ) 
+    ) :
+    fachb_list();
 
   $address = $request[ "a" ];
   if ( !$address || !fachb_check_address( $address ) ) {
@@ -52,6 +59,15 @@ function fachb_rest_search( WP_REST_Request $request ) {
     ) );
   }, $betriebe );
 
+  // Betriebe nach Entfernung filtern.
+  $d = intval( $request[ "d" ] );
+  if ( $d ) {
+    $betriebe = array_filter( $betriebe, function ( $b ) use ( $d ) {
+      return intval( $b["distance"] ) <= $d;
+    } );
+  }
+
+  // Betriebe nach Entfernung sortieren.
   usort( $betriebe, function ( $a, $b ) {
     // FIXME: was wenn Betrieb ungültige Adresse hat? (ganz hinten einsortieren?)
     return $a["distance"] <=> $b["distance"];

@@ -44,6 +44,25 @@ function fachb_list() {
   return $wpdb->get_results( "SELECT * FROM {$prefix}betrieb;" );
 }
 
+function fachb_list_with_categories( $cats ) {
+  global $wpdb, $prefix;
+
+  $catssql = implode( ",", $cats ); // cats in sql array syntax
+  $catscnt = count( $cats );
+
+  // FIXME: Is this vulnerable? I guess not if catssql=implode(",",(array of intvals))?
+  // Still might want to change this. WPDB is a mess anyways.
+  return $wpdb->get_results(
+    "SELECT b.*
+    FROM {$prefix}betrieb AS b
+    JOIN {$prefix}betrieb_in_kategorie AS bik
+    ON bik.betrieb = b.id
+    WHERE bik.kategorie IN ({$catssql})
+    GROUP BY b.id
+    HAVING count(*) = {$catscnt};"
+  );
+}
+
 function fachb_get( $id ) {
   global $wpdb, $prefix;
   return $wpdb->get_row( $wpdb->prepare( "SELECT * 
@@ -110,5 +129,15 @@ function fachb_category_update( $id, $name ) {
   $wpdb->update( "{$prefix}kategorie", array(
     "name" => $name
   ), array( "id" => $id ) );
+}
+
+function fachb_get_categories( $bid ) {
+  global $wpdb, $prefix;
+  return $wpdb->get_results( $wpdb->prepare (
+    "SELECT kategorie
+    FROM {$prefix}betrieb_in_kategorie
+    WHERE betrieb = %d",
+    $bid
+  ) );
 }
 

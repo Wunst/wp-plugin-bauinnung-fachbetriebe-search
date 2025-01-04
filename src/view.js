@@ -27,7 +27,7 @@ import {
   TextField, 
   Button, 
   Grid,
-  Select,
+  Autocomplete,
   Stack,
   MenuItem,
   Chip,
@@ -35,11 +35,9 @@ import {
   InputLabel
 } from "@mui/material";
 
-const categories = [
-  { id: 1, name: "Testkategorie 1" },
-  { id: 2, name: "Testkategorie 2" },
-  { id: 3, name: "Testkategorie 3" },
-]
+const categories = await (
+  await fetch("/index.php/wp-json/fachbetrieb/v1/categories")
+).json()
 
 const dummyResults = [
   {
@@ -74,31 +72,19 @@ function SearchForm( props ) {
     <Box class="fachbetrieb-search-form" component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
       <h2>Suche</h2>
       <h3>Fachgebiet</h3>
-      <FormControl fullWidth>
-        <InputLabel id="category-select-small-label">Kategorie</InputLabel>
-        <Select
+        <Autocomplete
           id="category"
-          name="category"
-          label="Kategorie"
           multiple
+          options={categories.map(c => c.id)}
+          getOptionLabel={id => categories.find(c => c.id == id).name}
           defaultValue={[]}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', gap: '0.25rem' }}>
-              {selected.map((id) => (
-                <Chip sx={{ fontSize: '1rem' }}
-                  key={id}
-                  label={categories.find(o => o.id == id).name}/>
-              ))}
-            </Box>
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Kategorien"
+            />
           )}
-          sx={{ height: "7rem" }}
-          fullWidth
-        >
-          {categories.map(o =>
-            <MenuItem value={o.id} label={o.name}>{o.name}</MenuItem>
-          )}
-        </Select>
-      </FormControl>
+        />
       <h3>Ihre Baustelle</h3>
       <Grid container spacing={2}>
         <Grid item xs={9}>

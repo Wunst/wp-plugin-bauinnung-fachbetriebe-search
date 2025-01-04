@@ -20,7 +20,11 @@
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
  */
 
-import { render } from '@wordpress/element'
+import {
+  render,
+  useEffect,
+  useState
+} from '@wordpress/element'
 
 import {
   Box, 
@@ -35,41 +39,28 @@ import {
   InputLabel
 } from "@mui/material";
 
+import placeholderLogo from "./placeholder-logo.png"
+
 const categories = await (
   await fetch("/index.php/wp-json/fachbetrieb/v1/categories")
 ).json()
 
-const dummyResults = [
-  {
-    name: "Musterbau Mustermann",
-    adresse: "Musterstr. 123, 24567 Kiel",
-    url: "musterbau.de",
-    icon: "https://static.vecteezy.com/system/resources/previews/010/885/577/original/tools-icon-equipment-symbol-repair-construction-illustration-work-tools-instrument-service-sign-engineer-hardware-mechanic-industrial-kit-diy-group-support-carpentry-hand-repair-icon-vector.jpg"
-  },
-  {
-    name: "Baugeschäft Bruno Andschatzen KG",
-    adresse: "Spitzenkamp 1f, 21337 Kiel",
-    url: "brandschatzen.de",
-    icon: "https://www.pngall.com/wp-content/uploads/4/Viking-Vector-PNG-Image.png"
-  },
-  {
-    name: "Fliesenleger Example & Co.",
-    adresse: "Winterbeker Weg 12, 24114 Kiel",
-    url: "example.com",
-    icon: "https://www.schmitt-fliesen.de/wp-content/uploads/2023/01/Fliesen-Schmitt_Icon_350px.png"
-  }
-]
-
 function SearchApp( props ) {
+  const [query, setQuery] = useState({})
+
   return <Grid container spacing={3}>
-    <SearchForm/>
-    <SearchResults/>
+    <SearchForm query={query} setQuery={setQuery}/>
+    <SearchResults query={query}/>
   </Grid>
 }
 
-function SearchForm( props ) {
-  return <Grid item xs={12} md={4}>
-    <Box class="fachbetrieb-search-form" component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
+function SearchForm({ query, setQuery }) {
+  return <Grid item 
+    xs={12} 
+    md={5}
+    lg={4}
+  >
+    <Box class="fachbetrieb-search-form" component="form" sx={{ mt: 4 }}>
       <h2>Suche</h2>
       <h3>Fachgebiet</h3>
         <Autocomplete
@@ -84,6 +75,9 @@ function SearchForm( props ) {
               label="Kategorien"
             />
           )}
+          onChange={(event, newValue) => {
+            setQuery({ ...query, c: newValue.join(",") })
+          }}
         />
       <h3>Ihre Baustelle</h3>
       <Grid container spacing={2}>
@@ -124,11 +118,17 @@ function SearchForm( props ) {
       </Grid>
       <h3>Suche im Umkreis</h3>
       Suche im Umkreis von
-      <Box sx={{ display: "inline-flex", padding: "1em", width: "120px" }}>
+      <Box sx={{ display: "inline-flex", padding: "1em", width: "130px" }}>
         <TextField
           id="distance"
           name="distance"
           label="Entfernung"
+          inputProps={{
+            type: "number"
+          }}
+          onChange={(event) => {
+            setQuery({ ...query, d: event.target.value })
+          }}
         />
       </Box>
       km
@@ -136,29 +136,60 @@ function SearchForm( props ) {
   </Grid>
 }
 
-function SearchResults( props ) {
-  return <Grid item xs={12} md={8}>
-    {dummyResults.map(result => <div class="fachbetrieb-search-result">
+function SearchResults({ query }) {
+  const [search, setSearch] = useState({
+    results: []
+  })
+
+  useEffect(() => {
+    (async () =>
+      setSearch(await (
+        await fetch("/index.php/wp-json/fachbetrieb/v1/search?" +
+          new URLSearchParams(query)
+        )
+      ).json())
+    )();
+    return () => {}
+  }, [query])
+
+  return <Grid item
+    xs={12} 
+    md={7}
+    lg={8}
+  >
+    {
+      // TODO: warn if address invalid
+    }
+    {search.results.map(result => <div class="fachbetrieb-search-result">
       <Grid container spacing={4}>
         <Grid item
-          xs={4}
-          sm={2}
+          xs={5}
+          sm={3}
+          md={4}
+          xl={2}
           component="img"
-          src={result.icon}
+          src={result.logo ||
+            placeholderLogo}
           alt={`Logo von ${result.name}`}
           sx={{
             aspectRatio: 1.0,
             objectFit: "cover",
           }}
         />
-        <Grid item xs={8} sm={5}>
+        <Grid item
+          xs={7}
+          sm={8}
+          xl={4}
+        >
           <Stack direction="column">
             <h3>{result.name}</h3>
             <p>{result.adresse}</p>
-            <a href={result.url}>🌐 {result.url}</a>
+            {result.url &&
+              <a href={result.url}>{result.url}</a>
+            }
           </Stack>
         </Grid>
-        <Grid item xs={6} sm={5}>
+        <Grid item xs={6}>
           <h4>Fachbetrieb für</h4>
           <Chip
             label="Hochbau"
@@ -188,9 +219,6 @@ function SearchResults( props ) {
       </Grid>
     </div>)}
   </Grid>
-}
-
-function handleSubmit() {
 }
 
 render(

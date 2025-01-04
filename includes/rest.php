@@ -18,6 +18,8 @@ function fachb_rest_api_init() {
  *
  * c= Komma-getrennte Liste von Kategorien
  * Betrieb muss ALLE Kategorien haben, um angezeigt zu werden.
+ * a= Hausnummer,Straße,PLZ,Ort
+ * d= Dezimalwert max. Distanz in km
  *
  * Response:
  *  {
@@ -60,10 +62,12 @@ function fachb_rest_search( WP_REST_Request $request ) {
   }, $betriebe );
 
   // Betriebe nach Entfernung filtern.
-  $d = intval( $request[ "d" ] );
+  $d = $request[ "d" ];
   if ( $d ) {
+    echo $d;
     $betriebe = array_filter( $betriebe, function ( $b ) use ( $d ) {
-      return intval( $b["distance"] ) <= $d;
+      echo "D:{$b["distance"]}";
+      return floatval( $b["distance"] ) <= floatval( $d );
     } );
   }
 

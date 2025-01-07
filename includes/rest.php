@@ -74,7 +74,6 @@ function fachb_rest_search( WP_REST_Request $request ) {
   // Betriebe nach Entfernung filtern.
   $d = $request[ "d" ];
   if ( $d ) {
-    echo $d;
     $betriebe = array_filter( $betriebe, function ( $b ) use ( $d ) {
       return floatval( $b["distance"] ) <= floatval( $d );
     } );

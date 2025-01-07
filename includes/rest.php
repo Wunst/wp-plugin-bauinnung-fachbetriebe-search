@@ -76,7 +76,6 @@ function fachb_rest_search( WP_REST_Request $request ) {
   if ( $d ) {
     echo $d;
     $betriebe = array_filter( $betriebe, function ( $b ) use ( $d ) {
-      echo "D:{$b["distance"]}";
       return floatval( $b["distance"] ) <= floatval( $d );
     } );
   }

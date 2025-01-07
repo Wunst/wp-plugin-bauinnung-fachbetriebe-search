@@ -40,8 +40,9 @@ function fachb_create_handler() {
   $name = fachb_require_param("name");
   $address = fachb_require_param("address");
   $url = $_POST["url"]; // optional
+  $logo = $_POST["logo"]; // optional
 
-  $id = fachb_create( $name, $address, $url );
+  $id = fachb_create( $name, $address, $url, $logo );
 
   wp_redirect( admin_url( "?page=fachbetrieb&id=$id" ) );
   exit();
@@ -62,11 +63,19 @@ function fachb_update_handler() {
   $name = fachb_require_param("name");
   $address = fachb_require_param("adresse");
   $url = $_POST["url"];
+  $logo = $_POST["logo"];
 
   if ( !$url ) // Do not display a link on empty URL.
     $url = null;
 
-  fachb_update( intval( $id ), $name, $address, $url );
+  if ( !$logo )
+    $logo = null;
+
+  $new_cat = array_filter( fachb_category_list(), function ($cat) {
+    return $_POST[strval( $cat->id )] == "on";
+  } );
+
+  fachb_update( intval( $id ), $name, $address, $url, $logo, $new_cat );
 
   wp_redirect( admin_url( "?page=fachbetrieb" ) );
   exit();
@@ -111,6 +120,8 @@ function fachb_form() {
 
 function fachb_form_update() {
   $betrieb = fachb_get( $_GET["id"] );
+  $all_cat = fachb_category_list();
+  $my_cat = fachb_get_categories( $betrieb->id );
 
   if ( !$betrieb ) {
     fachb_form_base();
@@ -124,6 +135,7 @@ function fachb_form_update() {
   <a href="<?php echo admin_url( "?page=fachbetrieb" ) ?>">&lt; Zurück</a>
   <!-- Main form. -->
   <form action="<?php echo admin_url( "admin-post.php" ); ?>" method="post">
+    <h2>Daten</h2>
     <input type="hidden" name="action" value="fachb_update" />
     <input type="hidden" name="id" value="<?php echo $_GET["id"]; ?>" />
     <div>
@@ -150,6 +162,29 @@ function fachb_form_update() {
         Internetadresse (optional)
       </label>
     </div>
+    <div>
+      <input type="text" name="logo" id="logo" value="<?php
+        echo $betrieb->logo;
+      ?>">
+      <label for="logo">
+        Logo-URL (optional)
+      </label>
+    </div>
+    <h2>Kategorienzuordnung</h2>
+    <div>
+      <?php foreach ( $all_cat as $cat ) { ?>
+        <input type="checkbox"
+          name="<?php echo $cat->id; ?>"
+          id="<?php echo $cat->id; ?>"
+          <?php echo array_filter( $my_cat, function ($my) use($cat) {
+            return $my->id == $cat->id;
+          } ) ? "checked" : "" ?>
+        />
+        <label for="<?php echo $cat->id; ?>">
+          <?php echo $cat->name; ?>
+        </label>
+      <?php } ?>
+    </div>
     <input type="submit" value="Ändern"/>
   </form>
 <?php }
@@ -175,9 +210,16 @@ function fachb_form_base() { ?>
     </div>
     <div>
       <input type="text" name="url" id="url" 
-        placeholder="www.musterbau.de">
+        placeholder="https://musterbau.de">
       <label for="url">
         Internetadresse (optional)
+      </label>
+    </div>
+    <div>
+      <input type="text" name="logo" id="logo" 
+        placeholder="https://musterbau.de/pfad/zu/logo.png">
+      <label for="logo">
+        Logo-URL (optional)
       </label>
     </div>
     <input type="submit" value="Hinzufügen"/>

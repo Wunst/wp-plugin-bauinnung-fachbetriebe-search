@@ -81,12 +81,13 @@ function fachb_get( $id ) {
 /*
  * Erstellt einen Betrieb und gibt die ID zurück.
  */
-function fachb_create( $name, $adresse, $url ) {
+function fachb_create( $name, $adresse, $url, $logo ) {
   global $wpdb, $prefix;
   $wpdb->insert( "{$prefix}betrieb", array(
     "name" => $name,
     "adresse" => $adresse,
-    "url" => $url
+    "url" => $url,
+    "logo" => $logo
   ) );
 
   return $wpdb->insert_id;
@@ -97,13 +98,26 @@ function fachb_delete( $id ) {
   $wpdb->delete( "{$prefix}betrieb", array( "id" => $id ) );
 }
 
-function fachb_update( $id, $name, $adresse, $url ) {
+function fachb_update( $id, $name, $adresse, $url, $logo, $new_cat ) {
   global $wpdb, $prefix;
   $wpdb->update( "{$prefix}betrieb", array(
     "name" => $name,
     "adresse" => $adresse,
-    "url" => $url
+    "url" => $url,
+    "logo" => $logo
   ), array( "id" => $id ) );
+
+  // Category update. First delete all categories then insert new
+  $wpdb->query( $wpdb->prepare(
+    "DELETE FROM {$prefix}betrieb_in_kategorie WHERE betrieb = %d;",
+    $id
+  ) );
+  foreach ( $new_cat as $cat ) {
+    $wpdb->insert( "{$prefix}betrieb_in_kategorie", array(
+      "betrieb" => $id,
+      "kategorie" => $cat->id
+    ) );
+  }
 }
 
 /*

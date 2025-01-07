@@ -5,6 +5,9 @@ $prefix = $wpdb->prefix . "fachb_";
 function fachb_install() {
   global $wpdb, $prefix;
 
+  // necessary for some reason.
+  $prefix = $wpdb->prefix . "fachb_";
+
   // We do not and cannot use the dbDelta mechanism as it does not support
   // FOREIGN KEY constraints.
   
@@ -32,7 +35,10 @@ function fachb_install() {
 
   // Migrations.
   // Make url nullable.
-  $wpdb->query( "ALTER TABLE {$prefix}betrieb MODIFY url text" );
+  $wpdb->query( "ALTER TABLE {$prefix}betrieb MODIFY url text;" );
+
+  // Add logo.
+  $wpdb->query( "ALTER TABLE {$prefix}betrieb ADD logo text;" );
 }
 
 // TODO: Deinstallation.

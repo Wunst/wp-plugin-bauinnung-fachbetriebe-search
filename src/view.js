@@ -115,6 +115,21 @@ function SearchForm({ query, setQuery }) {
             fullWidth
           />
         </Grid>
+        <Grid item xs={2}>
+          <Button
+            onClick={() => {
+              setQuery({ ...query, a: [
+                // TODO: make this not suck
+                document.getElementById("number").value,
+                document.getElementById("street").value,
+                document.getElementById("city").value,
+                document.getElementById("plz").value
+              ].join(",")
+            })}}
+          >
+            Aktualisieren
+          </Button>
+        </Grid>
       </Grid>
       <h3>Suche im Umkreis</h3>
       Suche im Umkreis von
@@ -160,65 +175,69 @@ function SearchResults({ query }) {
     {
       // TODO: warn if address invalid
     }
-    {search.results.map(result => <div class="fachbetrieb-search-result">
-      <Grid container spacing={4}>
-        <Grid item
-          xs={5}
-          sm={3}
-          md={4}
-          xl={2}
-          component="img"
-          src={result.logo ||
-            placeholderLogo}
-          alt={`Logo von ${result.name}`}
-          sx={{
-            aspectRatio: 1.0,
-            objectFit: "cover",
-          }}
-        />
-        <Grid item
-          xs={7}
-          sm={8}
-          xl={4}
-        >
-          <Stack direction="column">
-            <h3>{result.name}</h3>
-            <p>{result.adresse}</p>
-            {result.url &&
-              <a href={result.url}>{result.url}</a>
-            }
-          </Stack>
-        </Grid>
-        <Grid item xs={6}>
-          <h4>Fachbetrieb für</h4>
-          <Chip
-            label="Hochbau"
-            style={{
-              display: "inline"
-            }}
-          />
-          <Chip
-            label="Tiefbau"
-            style={{
-              display: "inline"
-            }}
-          />
-          <Chip
-            label="Abriss"
-            style={{
-              display: "inline"
-            }}
-          />
-          <Chip
-            label="blablabla"
-            style={{
-              display: "inline"
-            }}
-          />
-        </Grid>
-      </Grid>
-    </div>)}
+    {search.results.map(result => <SearchResult
+      id={result.id}
+      name={result.name}
+      adresse={result.adresse}
+      url={result.url}
+      logo={result.logo}
+    />)}
   </Grid>
+}
+
+function SearchResult({ id, name, adresse, url, logo }) {
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    (async () => {
+      setCategories(await (
+        await fetch("/index.php/wp-json/fachbetrieb/v1/betrieb/categories?id=" + id)
+      ).json())
+    })()
+    return () => {}
+  }, [id])
+
+  // TODO: clickable category buttons
+  return <div class="fachbetrieb-search-result">
+    <Grid container spacing={4}>
+      <Grid item
+        xs={5}
+        sm={3}
+        md={4}
+        xl={2}
+        component="img"
+        src={logo ||
+          placeholderLogo}
+        alt={`Logo von ${name}`}
+        sx={{
+          aspectRatio: 1.0,
+          objectFit: "cover",
+        }}
+      />
+      <Grid item
+        xs={7}
+        sm={8}
+        xl={4}
+      >
+        <Stack direction="column">
+          <h3>{name}</h3>
+          <p>{adresse}</p>
+          {url &&
+            <a href={url}>{url}</a>
+          }
+        </Stack>
+      </Grid>
+      <Grid item xs={6}>
+        <h4>Fachbetrieb für</h4>
+        {categories.map(({ id, name }) => <Chip
+          label={name}
+          style={{
+            display: "inline"
+          }}
+        />)}
+      </Grid>
+    </Grid>
+  </div>;
 }
 
 render(

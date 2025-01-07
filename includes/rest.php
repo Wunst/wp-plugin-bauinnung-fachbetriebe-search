@@ -15,6 +15,11 @@ function fachb_rest_api_init() {
     "methods" => "GET",
     "callback" => "fachb_rest_categories"
   ) );
+
+  register_rest_route( "fachbetrieb/v1", "/betrieb/categories", array(
+    "methods" => "GET",
+    "callback" => "fachb_rest_betrieb_categories"
+  ) );
 }
 
 /*
@@ -102,5 +107,25 @@ function fachb_rest_search( WP_REST_Request $request ) {
  */
 function fachb_rest_categories( WP_REST_Request $request ) {
   return fachb_category_list();
+}
+
+/*
+ * GET /fachbetrieb/v1/betrieb/categories?id=[id]
+ * Liefert die Kategorien für einen Betrieb.
+ *
+ * Response:
+ *  [
+ *    {
+ *      "id": "number",
+ *      "name": "string"
+ *    }
+ *  ]
+ */
+function fachb_rest_betrieb_categories( WP_REST_Request $request ) {
+  if ( !$request["id"] ) {
+    return null;
+  }
+
+  return fachb_get_categories( intval( $request["id"] ) );
 }
 

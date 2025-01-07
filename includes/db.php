@@ -134,9 +134,11 @@ function fachb_category_update( $id, $name ) {
 function fachb_get_categories( $bid ) {
   global $wpdb, $prefix;
   return $wpdb->get_results( $wpdb->prepare (
-    "SELECT kategorie
-    FROM {$prefix}betrieb_in_kategorie
-    WHERE betrieb = %d",
+    "SELECT k.id, k.name
+    FROM {$prefix}kategorie as k
+    JOIN {$prefix}betrieb_in_kategorie as bik
+    ON bik.kategorie = k.id
+    WHERE bik.betrieb = %d;",
     $bid
   ) );
 }

@@ -275,7 +275,26 @@ function fachb_form_base() { ?>
     <input type="submit" value="Löschen" 
       onclick="return confirm('Sind Sie sicher?')"/>
   </form>
-<?php }
+
+<?php
+  $errs = array_filter( fachb_list(), function ($b) {
+    return !fachb_check_address($b->adresse);
+  } );
+  if ( $errs ) {
+?>
+  <h1>Probleme (<?php echo count( $errs ); ?>)</h1>
+<?php
+    foreach ( $errs as $err ) {
+?>
+  <h3 style="color:red;">
+    Betrieb <?php echo $err->name; ?> hat ungültige Adresse:
+    <?php echo $err->adresse; ?>.
+    <a href="<?php echo admin_url( "?page=fachbetrieb&id=" . $err->id ); ?>">Ändern</a>
+  </h3>
+<?php
+    }
+  }
+}
 
 function fachb_form_select() { ?>
   <div>

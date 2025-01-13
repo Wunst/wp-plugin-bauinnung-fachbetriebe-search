@@ -27,6 +27,7 @@ import {
 } from '@wordpress/element'
 
 import {
+  Alert,
   Box, 
   TextField, 
   Button, 
@@ -171,13 +172,16 @@ function SearchResults({ query }) {
     xs={12} 
     md={7}
     lg={8}
+    className="fachbetrieb-search-results"
   >
-    {
-      // TODO: warn if address invalid
-    }
+    {query.a && !search.sorted && <Alert severity="warning">
+      Ihre Adresse konnte nicht zugeordnet werden. Die Ergebnisse sind daher nicht sortiert. 
+      Sind Sie sicher, dass Sie die Adresse richtig geschrieben haben?
+    </Alert>}
     {search.results.map(result => <SearchResult
       id={result.id}
       name={result.name}
+      distance={result.distance}
       adresse={result.adresse}
       url={result.url}
       logo={result.logo}
@@ -185,7 +189,7 @@ function SearchResults({ query }) {
   </Grid>
 }
 
-function SearchResult({ id, name, adresse, url, logo }) {
+function SearchResult({ id, name, adresse, distance, url, logo }) {
   const [categories, setCategories] = useState([])
 
   useEffect(() => {
@@ -221,7 +225,11 @@ function SearchResult({ id, name, adresse, url, logo }) {
       >
         <Stack direction="column">
           <h3>{name}</h3>
-          <p>{adresse}</p>
+          <p>{adresse}<br/>
+          {
+            distance != null && <small>{distance.toFixed(1)} km entfernt</small> 
+          }
+          </p>
           {url &&
             <a href={url}>{url}</a>
           }

@@ -1,12 +1,12 @@
 <?php
 /*
  * Plugin Name: Fachbetrieb finden
- * Plugin URI: https://github.com/Wunst/wp-plugin-bauinnung-kiel-fachbetriebe-search
+ * Plugin URI: https://github.com/Wunst/wp-plugin-bauinnung-fachbetriebe-search
  * Author: Ben Matthies
  * Author URI: https://github.com/Wunst
- * Version: 1.3.2
+ * Version: 1.4.0
  * Update URI: false
- * GitHub Plugin URI: Wunst/wp-plugin-bauinnung-kiel-fachbetriebe-search
+ * GitHub Plugin URI: Wunst/wp-plugin-bauinnung-fachbetriebe-search
  * Primary Branch: main
  * Release Asset: true
  * Requires at least: 6.2

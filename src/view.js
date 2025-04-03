@@ -34,16 +34,15 @@ import {
   Grid,
   Autocomplete,
   Stack,
-  MenuItem,
   Chip,
-  FormControl,
-  InputLabel
 } from "@mui/material";
 
 import placeholderLogo from "./placeholder-logo.png"
 
+const restUrl = "/index.php/?rest_route=/"
+
 const categories = await (
-  await fetch("/index.php/wp-json/fachbetrieb/v1/categories")
+  await fetch(restUrl + "fachbetrieb/v1/categories")
 ).json()
 
 function SearchApp( props ) {
@@ -160,7 +159,7 @@ function SearchResults({ query }) {
   useEffect(() => {
     (async () =>
       setSearch(await (
-        await fetch("/index.php/wp-json/fachbetrieb/v1/search?" +
+        await fetch(restUrl + "fachbetrieb/v1/search&" +
           new URLSearchParams(query)
         )
       ).json())
@@ -195,7 +194,7 @@ function SearchResult({ id, name, adresse, distance, url, logo }) {
   useEffect(() => {
     (async () => {
       setCategories(await (
-        await fetch("/index.php/wp-json/fachbetrieb/v1/betrieb/categories?id=" + id)
+        await fetch(restUrl + "fachbetrieb/v1/betrieb/categories&id=" + id)
       ).json())
     })()
     return () => {}

@@ -29,8 +29,8 @@ function fachb_install() {
     betrieb int NOT NULL,
     kategorie int NOT NULL,
     PRIMARY KEY  (betrieb, kategorie),
-    FOREIGN KEY (betrieb) REFERENCES $prefix$betrieb(id),
-    FOREIGN KEY (kategorie) REFERENCES $prefix$kategorie(id)
+    FOREIGN KEY (betrieb) REFERENCES {$prefix}betrieb(id),
+    FOREIGN KEY (kategorie) REFERENCES {$prefix}kategorie(id)
   );");
 
   // Migrations.

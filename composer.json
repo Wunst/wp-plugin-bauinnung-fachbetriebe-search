@@ -14,12 +14,17 @@
     "authors": [
         {
             "name": "Wunst",
-            "email": "matthiesbe@gmail.com"
+            "email": "ben@matthsch.de"
         }
     ],
     "config": {
         "allow-plugins": {
             "php-http/discovery": true
         }
+    },
+    "autoload": {
+      "psr-4": {
+        "Fachbetrieb\\": "Functions/"
+      }
     }
 }

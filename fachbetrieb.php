@@ -19,5 +19,5 @@ if ( !defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-register_activation_hook ( __FILE__, \Fachbetrieb\Db::instance()->install(...) );
+register_activation_hook ( __FILE__, \Fachbetrieb\Db::install(...) );
 add_action( "admin_menu", \Fachbetrieb\AdminMenu::register(...) );

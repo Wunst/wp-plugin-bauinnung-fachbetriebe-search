@@ -1,8 +1,6 @@
 {
-  "plugins": [
-    "."
-  ],
-  "themes": [
-    "../wp-theme-bauinnung-kiel"
-  ]
+  "testsEnvironment": false,
+  "phpmyadmin": true,
+  "plugins": [ "." ],
+  "themes": [ "../wp-theme-bauinnung-kiel" ]
 }

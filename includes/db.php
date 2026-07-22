@@ -1,6 +1,6 @@
 <?php
 
-namespace Fachbetrieb;
+namespace Fachbetrieb\Db;
 
 
 /**
@@ -33,13 +33,10 @@ class Betrieb {
 }
 
 
-namespace Fachbetrieb\Db;
-
-
 /**
  * Shorthand to not declare globals everywhere.
  */
-function wpdb( ): wpdb {
+function wpdb( ): \wpdb {
   global $wpdb;
   return $wpdb;
 }
@@ -59,10 +56,10 @@ function install( ) : void {
   // plain `query'.
   dbDelta(
     <<<SQL
-      create table {$prefix}betrieb (
-        id int not null auto_increment, 
-        name text not null,
-        address text not null,
+      CREATE TABLE {$prefix}betrieb (
+        id int NOT NULL auto_increment, 
+        name text NOT NULL,
+        address text NOT NULL,
         url text,
         email text,
         phone text,
@@ -73,18 +70,18 @@ function install( ) : void {
   );
   dbDelta(
     <<<SQL
-      create table {$prefix}kategorie (
-        id int not null auto_increment,
-        name text not null unique,
+      CREATE TABLE {$prefix}kategorie (
+        id int NOT NULL auto_increment,
+        name text NOT NULL unique,
         PRIMARY KEY  (id)
       );
     SQL
   );
   dbDelta(
     <<<SQL
-      create table {$prefix}betrieb_in_kategorie (
-        betrieb int not null,
-        kategorie int not null,
+      CREATE TABLE {$prefix}betrieb_in_kategorie (
+        betrieb int NOT NULL,
+        kategorie int NOT NULL,
         PRIMARY KEY  (betrieb, kategorie)
       );
     SQL
@@ -105,8 +102,8 @@ function list_betrieb( ): array {
   return array_map(
     function ( $row ) {
       return array(
-        'id' => $row['id'],
-        'betrieb' => new Betrieb( $row ),
+        'id' => $row->id,
+        'betrieb' => new Betrieb( (array)$row ),
       );
     },
     $results
@@ -121,7 +118,17 @@ function list_betrieb( ): array {
  * ])[]  Map of ids to category names.
  */
 function list_category( ): array {
-  return wpdb( )->get_results( 'select * from ' . prefix( ) . 'kategorie;' );
+  $results = wpdb( )->get_results( 'select * from ' . prefix( ) . 'kategorie;' );
+
+  return array_map(
+    function ( $row ) {
+      return array(
+        'id' => $row->id,
+        'name' => $row->name,
+      );
+    },
+    $results
+  );
 }
 
 
@@ -130,13 +137,13 @@ function list_category( ): array {
  */
 function get_betrieb( int $id ): Betrieb {
   $raw_data = wpdb( )->get_row(
-    $wpdb->prepare(
+    wpdb( )->prepare(
       'select * from ' . prefix( ) . 'betrieb where id = %d',
       $id
     )
   );
 
-  return new Betrieb( $raw_data );
+  return new Betrieb( (array)$raw_data );
 }
 
 
@@ -147,7 +154,7 @@ function get_betrieb( int $id ): Betrieb {
  */
 function create_betrieb( Betrieb $betrieb ): int {
   wpdb( )->insert( prefix( ) . 'betrieb', (array)$betrieb );
-  return $wpdb->insert_id;
+  return wpdb( )->insert_id;
 }
 
 
@@ -168,7 +175,7 @@ function delete_betrieb( int $id ): void {
 function update_betrieb( int $id,  Betrieb $betrieb_updated ): void {
   wpdb( )->update(
     /* update: */ prefix( ) . 'betrieb',
-    /* set: */ (array)$company_updated,
+    /* set: */ (array)$betrieb_updated,
     /* where: */ array( "id" => $id )
   );
 }
@@ -181,7 +188,7 @@ function update_betrieb( int $id,  Betrieb $betrieb_updated ): void {
  */
 function create_category( string $name ): int {
   wpdb( )->insert( prefix( ) . 'kategorie', array( "name" => $name ) );
-  return $wpdb->insert_id;
+  return wpdb( )->insert_id;
 }
 
 
@@ -230,6 +237,41 @@ function assign_categories( int $betrieb, array $categories ): void {
       );
     },
     $categories
+  );
+}
+
+
+/**
+ * Get categories for company.
+ * @param int  $betrieb  Company id.
+ * @return (array[
+ *   "id" => int,
+ *   "name" => string,
+ * ])[]  Map of ids to category names.
+ */
+function get_categories( int $betrieb ): array {
+  $prefix = prefix( );
+  $results = wpdb( )->get_results(
+    wpdb( )->prepare(
+      <<<SQL
+        SELECT k.id as id, k.name as name
+        FROM {$prefix}kategorie as k
+        JOIN {$prefix}betrieb_in_kategorie as bik
+        ON k.id = bik.kategorie
+        WHERE bik.betrieb = %d
+      SQL,
+      $betrieb
+    )
+  );
+
+  return array_map(
+    function ( $row ) {
+      return array(
+        'id' => $row->id,
+        'name' => $row->name,
+      );
+    },
+    $results
   );
 }
 

@@ -1,165 +1,235 @@
 <?php
 
-$prefix = $wpdb->prefix . "fachb_";
+namespace Fachbetrieb;
 
-function fachb_install() {
-  global $wpdb, $prefix;
 
-  // necessary for some reason.
-  $prefix = $wpdb->prefix . "fachb_";
-
-  // We do not and cannot use the dbDelta mechanism as it does not support
-  // FOREIGN KEY constraints.
-  
-  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}betrieb (
-    id int NOT NULL AUTO_INCREMENT,
-    name text NOT NULL,
-    adresse text NOT NULL,
-    url text DEFAULT '' NOT NULL,
-    PRIMARY KEY  (id)
-  );");
-
-  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}kategorie (
-    id int NOT NULL AUTO_INCREMENT,
-    name text NOT NULL UNIQUE,
-    PRIMARY KEY  (id)
-  );");
-
-  $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}betrieb_in_kategorie (
-    betrieb int NOT NULL,
-    kategorie int NOT NULL,
-    PRIMARY KEY  (betrieb, kategorie),
-    FOREIGN KEY (betrieb) REFERENCES {$prefix}betrieb(id),
-    FOREIGN KEY (kategorie) REFERENCES {$prefix}kategorie(id)
-  );");
-
-  // Migrations.
-  // Make url nullable.
-  $wpdb->query( "ALTER TABLE {$prefix}betrieb MODIFY url text;" );
-
-  // Add logo.
-  $wpdb->query( "ALTER TABLE {$prefix}betrieb ADD logo text;" );
-}
-
-// TODO: Deinstallation.
-
-// TODO: How to handle migrations.
-
-function fachb_list() {
-  global $wpdb, $prefix;
-  return $wpdb->get_results( "SELECT * FROM {$prefix}betrieb;" );
-}
-
-function fachb_list_with_categories( $cats ) {
-  global $wpdb, $prefix;
-
-  $catssql = implode( ",", $cats ); // cats in sql array syntax
-  $catscnt = count( $cats );
-
-  // FIXME: Is this vulnerable? I guess not if catssql=implode(",",(array of intvals))?
-  // Still might want to change this. WPDB is a mess anyways.
-  return $wpdb->get_results(
-    "SELECT b.*
-    FROM {$prefix}betrieb AS b
-    JOIN {$prefix}betrieb_in_kategorie AS bik
-    ON bik.betrieb = b.id
-    WHERE bik.kategorie IN ({$catssql})
-    GROUP BY b.id
-    HAVING count(*) = {$catscnt};"
-  );
-}
-
-function fachb_get( $id ) {
-  global $wpdb, $prefix;
-  return $wpdb->get_row( $wpdb->prepare( "SELECT * 
-    FROM {$prefix}betrieb
-    WHERE id = %d;", 
-    $id )
-  );
-}
-
-/*
- * Erstellt einen Betrieb und gibt die ID zurück.
+/**
+ * Represents company main data (Stammdaten) 
+ * without list of categories.
  */
-function fachb_create( $name, $adresse, $url, $logo ) {
-  global $wpdb, $prefix;
-  $wpdb->insert( "{$prefix}betrieb", array(
-    "name" => $name,
-    "adresse" => $adresse,
-    "url" => $url,
-    "logo" => $logo
-  ) );
+class Betrieb {
+  public string $name;
+  public string $address;
 
-  return $wpdb->insert_id;
-}
+  public ?string $url;
+  public ?string $email;
+  public ?string $phone;
+  public ?string $logo_url;
 
-function fachb_delete( $id ) {
-  global $wpdb, $prefix;
-  $wpdb->delete( "{$prefix}betrieb", array( "id" => $id ) );
-}
 
-function fachb_update( $id, $name, $adresse, $url, $logo, $new_cat ) {
-  global $wpdb, $prefix;
-  $wpdb->update( "{$prefix}betrieb", array(
-    "name" => $name,
-    "adresse" => $adresse,
-    "url" => $url,
-    "logo" => $logo
-  ), array( "id" => $id ) );
+  /**
+   * Constructs company object from data array 
+   * (e.g. database, form data).
+   */
+  public function __construct( array $raw_data ) {
+    $this->name = $raw_data[ 'name' ];
+    $this->address = $raw_data[ 'address' ];
 
-  // Category update. First delete all categories then insert new
-  $wpdb->query( $wpdb->prepare(
-    "DELETE FROM {$prefix}betrieb_in_kategorie WHERE betrieb = %d;",
-    $id
-  ) );
-  foreach ( $new_cat as $cat ) {
-    $wpdb->insert( "{$prefix}betrieb_in_kategorie", array(
-      "betrieb" => $id,
-      "kategorie" => $cat->id
-    ) );
+    $this->url = $raw_data[ 'url' ];
+    $this->email = $raw_data[ 'email' ];
+    $this->phone = $raw_data[ 'phone' ];
+    $this->logo_url = $raw_data[ 'logo_url' ];
   }
 }
 
-/*
- * Erstellt eine Kategorie und gibt die ID zurück.
- */
-function fachb_category_create( $name )
-{
-  global $wpdb, $prefix;
-  $wpdb->insert( "{$prefix}kategorie", array(
-    "name" => $name
-  ) );
 
+namespace Fachbetrieb\Db;
+
+
+/**
+ * Shorthand to not declare globals everywhere.
+ */
+function wpdb( ): wpdb {
+  global $wpdb;
+  return $wpdb;
+}
+
+function prefix( ): string {
+  return wpdb( )->prefix . 'fachbetrieb_';
+}
+
+
+function install( ) : void {
+  $prefix = prefix( );
+
+  require_once ( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+  // TODO: We cannot use foreign keys `dbDelta'.
+  // May want to add them for performance using 
+  // plain `query'.
+  dbDelta(
+    <<<SQL
+      create table {$prefix}betrieb (
+        id int not null auto_increment, 
+        name text not null,
+        address text not null,
+        url text,
+        email text,
+        phone text,
+        logo_url text,
+        PRIMARY KEY  (id)
+      );
+    SQL 
+  );
+  dbDelta(
+    <<<SQL
+      create table {$prefix}kategorie (
+        id int not null auto_increment,
+        name text not null unique,
+        PRIMARY KEY  (id)
+      );
+    SQL
+  );
+  dbDelta(
+    <<<SQL
+      create table {$prefix}betrieb_in_kategorie (
+        betrieb int not null,
+        kategorie int not null,
+        PRIMARY KEY  (betrieb, kategorie)
+      );
+    SQL
+  );
+}
+
+
+/**
+ * Returns a list of all companies.
+ * @return (array[
+ *   "id" => int,
+ *   "betrieb" => Betrieb,
+ * ])[]  Map of ids to companies.
+ */
+function list_betrieb( ): array {
+  $results = wpdb( )->get_results( 'select * from ' . prefix( ) . 'betrieb;' );
+
+  return array_map(
+    function ( $row ) {
+      return array(
+        'id' => $row['id'],
+        'betrieb' => new Betrieb( $row ),
+      );
+    },
+    $results
+  );
+}
+
+/**
+ * Returns a list of all categories.
+ * @return (array[
+ *   "id" => int,
+ *   "name" => string,
+ * ])[]  Map of ids to category names.
+ */
+function list_category( ): array {
+  return wpdb( )->get_results( 'select * from ' . prefix( ) . 'kategorie;' );
+}
+
+
+/**
+ * Gets a company by id.
+ */
+function get_betrieb( int $id ): Betrieb {
+  $raw_data = wpdb( )->get_row(
+    $wpdb->prepare(
+      'select * from ' . prefix( ) . 'betrieb where id = %d',
+      $id
+    )
+  );
+
+  return new Betrieb( $raw_data );
+}
+
+
+/**
+ * Creates and inserts a new company into the 
+ * database.
+ * @return int  Id of the new company.
+ */
+function create_betrieb( Betrieb $betrieb ): int {
+  wpdb( )->insert( prefix( ) . 'betrieb', (array)$betrieb );
   return $wpdb->insert_id;
 }
 
-function fachb_category_list()
-{
-  global $wpdb, $prefix;
-  return $wpdb->get_results( "SELECT * FROM {$prefix}kategorie;" );
+
+/**
+ * Deletes a company by id.
+ */
+function delete_betrieb( int $id ): void {
+  wpdb( )->delete( prefix( ) . 'betrieb', array( "id" => $id ) );
 }
 
-function fachb_category_delete( $id ) {
-  global $wpdb, $prefix;
-  $wpdb->delete( "{$prefix}kategorie", array( "id" => $id ) );
+
+/**
+ * Updates a company by id.
+ * @param Betrieb  betrieb_updated
+ * This will completely override company data. 
+ * Existing data needs to be included.
+ */
+function update_betrieb( int $id,  Betrieb $betrieb_updated ): void {
+  wpdb( )->update(
+    /* update: */ prefix( ) . 'betrieb',
+    /* set: */ (array)$company_updated,
+    /* where: */ array( "id" => $id )
+  );
 }
 
-function fachb_category_update( $id, $name ) {
-  global $wpdb, $prefix;
-  $wpdb->update( "{$prefix}kategorie", array(
-    "name" => $name
-  ), array( "id" => $id ) );
+
+/**
+ * Creates and inserts a new category into the 
+ * database.
+ * @return int  Id of the new category.
+ */
+function create_category( string $name ): int {
+  wpdb( )->insert( prefix( ) . 'kategorie', array( "name" => $name ) );
+  return $wpdb->insert_id;
 }
 
-function fachb_get_categories( $bid ) {
-  global $wpdb, $prefix;
-  return $wpdb->get_results( $wpdb->prepare (
-    "SELECT k.id, k.name
-    FROM {$prefix}kategorie as k
-    JOIN {$prefix}betrieb_in_kategorie as bik
-    ON bik.kategorie = k.id
-    WHERE bik.betrieb = %d;",
-    $bid
-  ) );
+
+/**
+ * Renames a category by id.
+ */
+function rename_category( int $id, string $name_updated ): void {
+  wpdb( )->update(
+    /* update: */ prefix( ) . 'kategorie',
+    /* set: */ array( "name" => $name ),
+    /* where: */ array( "id" => $id ),
+  );
+}
+
+
+/**
+ * Deletes a category by id.
+ */
+function delete_category( int $id ): void {
+  wpdb( )->delete( prefix( ) . 'kategorie', array( "id" => $id ) );
+}
+
+
+/**
+ * Updates category assignment on a company.
+ * @param int   betrieb     Company id.
+ * @param int[] categories  List of category ids.
+ */
+function assign_categories( int $betrieb, array $categories ): void {
+  // Remove existing assignments.
+  // XXX: The whole interface is most inelegant.
+  // But it works for the admin panel.
+  wpdb( )->delete( 
+    prefix( ) . 'betrieb_in_kategorie', 
+    array( 'betrieb' => $betrieb ),
+  );
+
+  array_map( 
+    function ( int $category ) use ( $betrieb ) {
+      wpdb( )->insert(
+        prefix( ) . 'betrieb_in_kategorie',
+        array(
+          'betrieb' => $betrieb,
+          'kategorie' => $category,
+        )
+      );
+    },
+    $categories
+  );
 }
 

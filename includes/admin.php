@@ -2,9 +2,12 @@
 
 namespace Fachbetrieb\Admin;
 
+require_once( FACHBETRIEB_PLUGDIR . 'includes/geo.php' );
+
 
 use \Fachbetrieb\Db;
 use \Fachbetrieb\Db\Betrieb;
+use \Fachbetrieb\Geo;
 
 
 add_action( "admin_menu", \Fachbetrieb\Admin\register(...) );
@@ -198,6 +201,31 @@ function display_form( ): void {
       onclick="return confirm('Sind Sie sicher?')"/>
   </form>
 <?
+
+  // Signal errors (invalid addresses). 
+  $errs = array_filter(
+    Db\list_betrieb( ), 
+    function ( $entry ) {
+      return !Geo\resolve( $entry['betrieb']->address );
+    }
+  );
+
+  if ( $errs ) {
+?>
+  <h1>Probleme (<?php echo count( $errs ); ?>)</h1>
+<?php
+    foreach ( $errs as $err ) {
+      $id = $err['id'];
+      $betrieb = $err['betrieb'];
+?>
+  <h3 style="color:red;">
+    Betrieb <?php echo $betrieb->name; ?> hat ungültige Adresse:
+    <?php echo $betrieb->address; ?>.
+    <a href="<?php echo admin_url( "?page=fachbetrieb&id=" . $id ); ?>">Ändern</a>
+  </h3>
+<?php
+    }
+  }
 }
 
 
@@ -284,23 +312,6 @@ function display_update_form( int $id, Betrieb $betrieb ) {
 
 function fachb_form_base() { 
   // TODO: add back once geocoding is refactored
-  $errs = array_filter( fachb_list(), function ($b) {
-    return !fachb_check_address($b->adresse);
-  } );
-  if ( $errs ) {
-?>
-  <h1>Probleme (<?php echo count( $errs ); ?>)</h1>
-<?php
-    foreach ( $errs as $err ) {
-?>
-  <h3 style="color:red;">
-    Betrieb <?php echo $err->name; ?> hat ungültige Adresse:
-    <?php echo $err->adresse; ?>.
-    <a href="<?php echo admin_url( "?page=fachbetrieb&id=" . $err->id ); ?>">Ändern</a>
-  </h3>
-<?php
-    }
-  }
 }
 
 function display_company_selector( ): void { 

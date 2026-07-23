@@ -1,5 +1,7 @@
 <?php
 
+namespace Fachbetrieb\Geo;
+
 use Geocoder\Query\GeocodeQuery;
 
 $provider = new \Geocoder\Provider\Cache\ProviderCache(
@@ -12,54 +14,29 @@ $provider = new \Geocoder\Provider\Cache\ProviderCache(
   )
 );
 
-/*
- * Ermittelt Distanz zwischen Koordinaten.
+/**
+ * Resolve address to coordinates.
+ * @param string  $address  Address of the form 
+ * "street, postcode, city" or similar
+ * @return null|array[
+ *   'lat' => float,
+ *   'lon' => float
+ * ]  Coordinates, or null if address not resolvable.
  */
-function fachb_haversine( $a, $b ) {
-    $earthRadius = 6371; // Earth's radius in kilometers
-
-    $latFrom = deg2rad( $a->getLatitude() );
-    $lonFrom = deg2rad( $a->getLongitude() );
-    $latTo = deg2rad( $b->getLatitude() );
-    $lonTo = deg2rad( $b->getLongitude() );
-
-    $latDelta = $latTo - $latFrom;
-    $lonDelta = $lonTo - $lonFrom;
-
-    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-        cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-    return $angle * $earthRadius;
-}
-
-/*
- * Ermittelt die Distanz in Kilometern zwischen addressA und addressB.
- */
-function fachb_distance( $addressA, $addressB ) {
+function resolve( string $address ): ?array {
   global $provider;
 
-  $a = $provider->geocodeQuery(
-    GeocodeQuery::create( $addressA )->withLimit( 1 ) 
+  $result = $provider->geocodeQuery(
+    GeocodeQuery::create( $address )->withLimit( 1 ) 
   );
-
-  $b = $provider->geocodeQuery(
-    GeocodeQuery::create( $addressB )->withLimit( 1 ) 
-  );
-
-  if ( $a->isEmpty() || $b->isEmpty() ) {
+  if ( $result->isEmpty( ) ) {
     return null;
   }
 
-  return fachb_haversine(
-    $a->first()->getCoordinates(), 
-    $b->first()->getCoordinates() 
+  $coordinates = $result->first( )->getCoordinates( );
+  return array(
+    'lat' => $coordinates->getLatitude( ),
+    'lon' => $coordinates->getLongitude( ),
   );
-}
-
-function fachb_check_address( $address ) {
-  global $provider;
-
-  return !$provider->geocodeQuery(
-    GeocodeQuery::create( $address )->withLimit( 1 )
-  )->isEmpty();
 }
 

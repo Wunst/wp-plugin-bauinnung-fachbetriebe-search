@@ -1,30 +1,67 @@
-/**
- * The following styles get applied both on the front of your site
- * and in the editor.
- *
- * Replace them with your own styles or remove the file completely.
- */
+#fachbetrieb {
+  #fachbetrieb-searchform {
+    margin-top: 1em;
+    background-color: var(--wp--preset--color--base);
+    padding: 0.5em;
+  }
 
-.wp-block-fachbetrieb-fachbetrieb-finden {
-  padding-top: 1em;
+  .fachbetrieb-results {
+    padding-left: 0;
+
+    li {
+      margin-bottom: 1em;
+      padding: 0.5em;
+      background-color: var(--wp--preset--color--base);
+      list-style: none;
+
+      .name {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        font-weight: 900;
+        font-size: var(--wp--preset--font-size--large);
+      }
+
+      .address {
+        margin-bottom: 1.5em;
+        font-style: unset;
+        font-weight: 500;
+        font-size: var(--wp--preset--font-size--small);
+      }
+
+      .phone, .email {
+        display: block;
+      }
+
+      .categories {
+        padding-left: 0;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        li {
+          display: inline;
+          background-color: rgba(0, 0, 0, 20%);
+          border-radius: 1em;
+          padding: 2px 0.5em 2px 0.5em;
+          list-style: none;
+        }
+      }
+    }
+  }
 }
 
-.fachbetrieb-search-form {
-  display: block;
-  position: sticky;
-  padding: 1em;
-  background-color: var(--wp--preset--color--base);
-}
+@media only screen and (min-width: 768px) {
+  #fachbetrieb {
+    display: flex;
 
-.fachbetrieb-search-result {
-  display: block;
-  padding: 1em;
-  min-height: 10em;
-  align-content: center;
-  background-color: var(--wp--preset--color--base);
-}
-
-.fachbetrieb-search-results > * {
-  margin-bottom: 1em;
+    #fachbetrieb-searchform { 
+      display: flex;
+      flex: 4; 
+    }
+    .fachbetrieb-results { 
+      display: flex;
+      padding-left: 1em;
+      flex-direction: column;
+      flex: 8; 
+    }
+  }
 }
 

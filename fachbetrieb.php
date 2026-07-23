@@ -20,8 +20,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 require_once( FACHBETRIEB_PLUGDIR . "includes/db.php" );
 require_once( FACHBETRIEB_PLUGDIR . "includes/admin.php" );
-//require_once( FACHBETRIEB_PLUGDIR . "includes/display.php" );
-//require_once( FACHBETRIEB_PLUGDIR . "includes/rest.php" );
+require_once( FACHBETRIEB_PLUGDIR . "includes/display.php" );
+require_once( FACHBETRIEB_PLUGDIR . "includes/rest.php" );
 
 register_activation_hook( __FILE__, \Fachbetrieb\Db\install(...) );
 

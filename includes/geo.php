@@ -3,11 +3,12 @@
 namespace Fachbetrieb\Geo;
 
 use Geocoder\Query\GeocodeQuery;
+use Phpfastcache\Helper\Psr16Adapter;
 
 
 // Use a rate-limited http client to avoid hitting API limits.
 $stack = \GuzzleHttp\HandlerStack::create();
-$stack->push(\Spatie\GuzzleRateLimiterMiddleware\RateLimiterMiddleware::perSecond(2));
+$stack->push(\Spatie\GuzzleRateLimiterMiddleware\RateLimiterMiddleware::perSecond(1));
 
 $httpClient = new \GuzzleHttp\Client(['handler' => $stack, 'timeout' => 30.0]);
 
@@ -16,9 +17,7 @@ $provider = new \Geocoder\Provider\Cache\ProviderCache(
     $httpClient,
     "Fachbetriebesuche Bauinnung Kiel"
   ),
-  new \Symfony\Component\Cache\Psr16Cache(
-    new \Symfony\Component\Cache\Adapter\FilesystemAdapter()
-  )
+  new Psr16Adapter( 'Files' ),
 );
 
 /**

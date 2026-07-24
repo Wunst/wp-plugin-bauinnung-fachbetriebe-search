@@ -198,7 +198,7 @@ function create_category( string $name ): int {
 function rename_category( int $id, string $name_updated ): void {
   wpdb( )->update(
     /* update: */ prefix( ) . 'kategorie',
-    /* set: */ array( "name" => $name ),
+    /* set: */ array( "name" => $name_updated ),
     /* where: */ array( "id" => $id ),
   );
 }

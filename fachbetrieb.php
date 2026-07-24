@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/Wunst/wp-plugin-bauinnung-fachbetriebe-search
  * Author: Ben Matthies
  * Author URI: https://github.com/Wunst
- * Version: 2.0.0
+ * Version: 2.1.0
  * Update URI: false
  * GitHub Plugin URI: Wunst/wp-plugin-bauinnung-fachbetriebe-search
  * Primary Branch: main

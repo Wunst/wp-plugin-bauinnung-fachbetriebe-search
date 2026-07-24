@@ -44,6 +44,9 @@ array_map(
     $categories = $entry['categories'];
 
     echo '<li>';
+    if ( $betrieb->logo_url )
+      echo '<img class="logo" alt="" src="' . esc_url( $betrieb->logo_url ) . '">';
+
     if ( $betrieb->url )
       // Link name to company site. 
       echo '<a href="' . $betrieb->url . '"> <h4 class="name">' .

@@ -9,10 +9,24 @@
     padding-left: 0;
 
     li {
+      * {
+        position: relative;
+        z-index: 1;
+      }
+
       margin-bottom: 1em;
       padding: 0.5em;
       background-color: var(--wp--preset--color--base);
       list-style: none;
+
+      .logo {
+        position: absolute;
+        right: 0;
+        max-height: 5em;
+        opacity: 0.3;
+
+        z-index: 0;
+      }
 
       .name {
         margin-top: 0.5em;

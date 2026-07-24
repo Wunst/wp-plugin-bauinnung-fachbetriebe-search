@@ -4,10 +4,17 @@ namespace Fachbetrieb\Geo;
 
 use Geocoder\Query\GeocodeQuery;
 
+
+// Use a rate-limited http client to avoid hitting API limits.
+$stack = \GuzzleHttp\HandlerStack::create();
+$stack->push(\Spatie\GuzzleRateLimiterMiddleware\RateLimiterMiddleware::perSecond(2));
+
+$httpClient = new \GuzzleHttp\Client(['handler' => $stack, 'timeout' => 30.0]);
+
 $provider = new \Geocoder\Provider\Cache\ProviderCache(
   \Geocoder\Provider\Nominatim\Nominatim::withOpenStreetMapServer(
-    new \Symfony\Component\HttpClient\Psr18Client(),
-    "Fachbetriebesuche der Bauinnung Kiel"
+    $httpClient,
+    "Fachbetriebesuche Bauinnung Kiel"
   ),
   new \Symfony\Component\Cache\Psr16Cache(
     new \Symfony\Component\Cache\Adapter\FilesystemAdapter()

@@ -78,6 +78,75 @@ function admin_post( ): void {
   case 'delete_category':
     Db\delete_category( $_POST['id'] );
     break;
+
+
+  case 'import_categories':
+    $csv = new \ParseCsv\Csv( );
+    $csv->parseFile( $_FILES['file']['tmp_name'] );
+    if ( array_diff(
+      array(
+        'category_name',
+      ),
+      $csv->titles
+    ) ) {
+      die( 'ungültige CSV. Sie haben eine falsche Datenbankdatei gewählt' );
+    }
+
+    // *Replace* existing data.
+    foreach ( Db\list_category( ) as $entry )
+      Db\delete_category( $entry['id'] );
+
+    foreach ( $csv->data as $row ) {
+      $name = $row[ 'category_name' ];
+      Db\create_category( $name );
+    }
+
+    break;
+
+
+  case 'import':
+    $csv = new \ParseCsv\Csv( );
+    $csv->parseFile( $_FILES['file']['tmp_name'] );
+    if ( array_diff(
+      array(
+        'name',
+        'address',
+        'url',
+        'email',
+        'phone',
+        'logo_url'
+      ),
+      $csv->titles
+    ) ) {
+      die( 'ungültige CSV. Sie haben eine falsche Datenbankdatei gewählt' );
+    }
+
+    // *Replace* existing data.
+    foreach ( Db\list_betrieb( ) as $entry )
+      Db\delete_betrieb( $entry['id'] );
+
+    // Map category (column) names to IDs.
+    $categories = array( );
+    foreach ( Db\list_category( ) as $entry )
+      $categories[ $entry['name'] ] = $entry[ 'id' ];
+
+    foreach ( $csv->data as $row ) {
+      $betrieb = new Betrieb( $row );
+      $id = Db\create_betrieb( $betrieb );
+
+      Db\assign_categories(
+        $id,
+        array_filter(
+          $categories,
+          function ( $id, $name ) use ( $row ) {
+            return !!( $row[ $name ] );
+          },
+          ARRAY_FILTER_USE_BOTH
+        )
+      );
+    }
+
+    break;
   }
 
   // Most routes should go back to main form.
@@ -226,6 +295,27 @@ function display_form( ): void {
 <?php
     }
   }
+
+?>
+  <h1>Import/Export</h1>
+  <h2>Kategorien importieren</h2>
+  <form action="<?php echo admin_url( "admin-post.php" ) ?>" enctype="multipart/form-data" method="post">
+    <input type="hidden" name="action" value="fachbetrieb">
+    <input type="hidden" name="inner_action" value="import_categories">
+    <input type="file" accept=".csv" name="file" required>
+    <input type="submit" value="Import"
+      onclick="return confirm('Achtung! Diese Aktion *löscht* die bestehenden Kategorien. Wollen Sie das wirklich?')">
+  </form>
+
+  <h2>Liste importieren</h2>
+  <form action="<?php echo admin_url( "admin-post.php" ) ?>" enctype="multipart/form-data" method="post">
+    <input type="hidden" name="action" value="fachbetrieb">
+    <input type="hidden" name="inner_action" value="import">
+    <input type="file" accept=".csv" name="file" required>
+    <input type="submit" value="Import"
+      onclick="return confirm('Achtung! Diese Aktion *löscht* die bestehenden Betriebe. Machen Sie vorher auf jeden Fall ein Backup.')">
+  </form>
+<?php
 }
 
 

@@ -55,12 +55,16 @@ function categories( \WP_REST_Request $request ): array {
  * @return array[
  *   'lat' => float,
  *   'lon' => float,
- * ]  Coordinates, or null if not resolved.
+ * ]  Coordinates, or empty array if not resolved.
  */
 function coordinates( \WP_REST_Request $request ): array {
   /// XXX: This may require rate limiting.
   // We'll see. If the server gets ddosed one 
   // day this is it.
-  return Geo\resolve( $request['address'] );
+  $result = Geo\resolve( $request['address'] );
+  if ( $result )
+    return $result;
+  else
+    return array();
 }
 

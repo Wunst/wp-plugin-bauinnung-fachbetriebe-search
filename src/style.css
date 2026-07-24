@@ -28,6 +28,10 @@
         font-size: var(--wp--preset--font-size--small);
       }
 
+      .distance:not(:empty)::after {
+        content: " km entfernt";
+      }
+
       .phone, .email {
         display: block;
       }
@@ -55,6 +59,7 @@
     #fachbetrieb-searchform { 
       display: flex;
       flex: 4; 
+      align-self: flex-start;
     }
     .fachbetrieb-results { 
       display: flex;

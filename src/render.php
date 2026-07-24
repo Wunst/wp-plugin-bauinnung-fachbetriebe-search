@@ -3,6 +3,7 @@
 require_once( FACHBETRIEB_PLUGDIR . 'includes/db.php' );
 
 use \Fachbetrieb\Db;
+use \Fachbetrieb\Geo;
 
 // Get list of companies to display.
 // This has the type
@@ -52,6 +53,14 @@ array_map(
       echo '<h4 class="name">' . $betrieb->name . '</h4>';
 
     echo '<address class="address">' . $betrieb->address . '</address>';
+
+    $coordinates = Geo\resolve( $betrieb->address );
+    if ( $coordinates ) {
+      echo '<p class="latitude" style="display: none;">' . $coordinates['lat'] . '</p>';
+      echo '<p class="longitude" style="display: none;">' . $coordinates['lon'] . '</p>';
+      echo '<p class="distance"></p>'; // This is filled in by the frontend.
+    }
+
     if ( $betrieb->phone )
       echo '<a class="phone" href="tel:' . $betrieb->phone . '">' . 
         $betrieb->phone . 

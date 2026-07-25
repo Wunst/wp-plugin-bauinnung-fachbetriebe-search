@@ -75,7 +75,7 @@ def main() -> None:
             
             if logo_filename is not None:
                 with open(logo_filename, '+bw') as logo_file:
-                    logo_file.write(attachment.as_bytes())
+                    logo_file.write(attachment.get_payload(decode=True))
                 break
 
 

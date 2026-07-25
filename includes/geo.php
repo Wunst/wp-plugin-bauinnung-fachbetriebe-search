@@ -3,7 +3,7 @@
 namespace Fachbetrieb\Geo;
 
 use Geocoder\Query\GeocodeQuery;
-use Phpfastcache\Helper\Psr16Adapter;
+use Phpfastcache\{Config\ConfigurationOption, Helper\Psr16Adapter};
 
 
 // Use a rate-limited http client to avoid hitting API limits.
@@ -17,7 +17,9 @@ $provider = new \Geocoder\Provider\Cache\ProviderCache(
     $httpClient,
     "Fachbetriebesuche Bauinnung Kiel"
   ),
-  new Psr16Adapter( 'Files' ),
+  new Psr16Adapter( 'Files', new ConfigurationOption([
+    'defaultTtl' => 365 * 24 * 60 * 60,
+  ]) ),
 );
 
 /**
